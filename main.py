@@ -95,6 +95,9 @@ class MainWindow(QtGui.QMainWindow):
         self.help_menu.setShortcut('F1')
         self.help_menu.setStatusTip('DB Upload Help Document')
         self.help_menu.triggered.connect(self.help_doc)
+        self.github_menu = QtGui.QAction(QtGui.QIcon('%s/icon_github.png' % IMAGE_ROOT), 'See us on GitHub',self)
+        self.github_menu.setStatusTip('See us on GitHub')
+        self.github_menu.triggered.connect(self.open_github)
         
         ## Menu bar
         menu_bar = self.menuBar()
@@ -109,6 +112,8 @@ class MainWindow(QtGui.QMainWindow):
         ### Help
         m_help = menu_bar.addMenu('&Help')
         m_help.addAction(self.help_menu)
+        m_help.addSeparator()
+        m_help.addAction(self.github_menu)
         
         ## Status bar
         self.statusBar()
@@ -296,6 +301,10 @@ class MainWindow(QtGui.QMainWindow):
             
     def help_doc(self):
         url = "http://pitondc1.piton.local/datacommons/db_upload_help_doc/"
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
+        
+    def open_github(self):
+        url = "https://github.com/qliu/DB_Upload"
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
         
         

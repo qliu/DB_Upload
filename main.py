@@ -291,7 +291,7 @@ class MainWindow(QtGui.QMainWindow):
         except Exception, e:
 #            self.error_label.setText("ERROR!<br/>")
             exc_type, exc_obj, exc_tb = sys.exc_info()
-            error_msg = "<br/><hr><span style='color:red'><b>ERROR!</b></span><br/><br/><b>%s</b>: %s<br/><hr><br/>Please try again!<br/><br/>Click <b>File -> Open...</b> to select a file to upload." % (exc_type.__name__,exc_obj)
+            error_msg = "<br/><hr><span style='color:red'><b>ERROR!</b></span><br/><br/><b>%s</b>: %s<br/><hr><br/>Please try again! Click <a href='http://pitondc1.piton.local/datacommons/db_upload_help_doc/#errors'>HERE</a> for help.<br/><br/>Click <b>File -> Open...</b> to select a file to upload." % (exc_type.__name__,exc_obj)
         finally:
             # Close connection to Datacommons DB
             dbcon_dc.close()

@@ -8,6 +8,9 @@ from PyQt4 import QtGui, QtCore
 from xlrd import open_workbook
 ## Import psycopg2 for PostgreSQL database connection
 import psycopg2
+## Import lib and module for sending emails
+import smtplib
+from email.mime.text import MIMEText
 
 LOCAL_DRIVER = 'O:/'
 UPLOAD_DATA_ROOT = 'O:/Data/Source Data/UPLOAD/'
@@ -28,6 +31,16 @@ DB_PORT = '5432'
 #DB_USER = 'qliu'
 #DB_HOST = 'localhost'
 #DB_PORT = '5432'
+
+# EMAIL SETTINGS
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'dataenginemetadata@gmail.com'
+EMAIL_HOST_PASSWORD = 'demetadatapiton'
+# Admin email
+ADMIN_EMAIL_ADDRESS = "dataenginemetadata@gmail.com"
+TO_EMAIL_ADDRESS = "dataenginemetadata+dbupload@gmail.com"
 
 class MainWindow(QtGui.QMainWindow):
     
@@ -201,7 +214,24 @@ class MainWindow(QtGui.QMainWindow):
         
     def enable_upload_menu(self):
         self.uploadfile_menu.setEnabled(True)
-        self.uploadfile_menu.setStatusTip('Upload')        
+        self.uploadfile_menu.setStatusTip('Upload')
+        
+    def send_email(self,email_subject,email_message):
+        '''
+        Send notification email when new table added to database
+        '''
+        # Initialize SMTP server
+        email_server = smtplib.SMTP(EMAIL_HOST,EMAIL_PORT)
+        email_server.ehlo()
+        email_server.starttls()
+        email_server.login(EMAIL_HOST_USER,EMAIL_HOST_PASSWORD)
+        # Send Email
+        msg = MIMEText(email_message)
+        msg['Subject'] = email_subject
+        msg['From'] = ADMIN_EMAIL_ADDRESS
+        msg['To'] = TO_EMAIL_ADDRESS
+        email_server.sendmail(ADMIN_EMAIL_ADDRESS,TO_EMAIL_ADDRESS,msg.as_string())
+        email_server.quit()
         
     # =========================
     # main functions
@@ -288,6 +318,9 @@ class MainWindow(QtGui.QMainWindow):
             cur_dc.execute(exesql)
             dbcon_dc.commit()
             error_msg = "<br/><hr><b>File uploaded successfully!</b><br/><br/>Please go to our admin site to <a href='http://pitondc1.piton.local/datacommons/admin/dcmetadata/sourcedatainventory/add/' target='_blank'>add metadata</a>."
+            email_subject = "[DB_upload]New Table Added - %s" % table_name
+            email_message = "This is a notification that new tabe %s has been added to the database." % table_name
+            self.send_email(email_subject,email_message)
         except Exception, e:
 #            self.error_label.setText("ERROR!<br/>")
             exc_type, exc_obj, exc_tb = sys.exc_info()

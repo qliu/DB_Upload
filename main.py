@@ -306,10 +306,7 @@ class MainWindow(QtGui.QMainWindow):
         #    exesql = "DROP TABLE IF EXISTS %s; CREATE TABLE %s (%s CONSTRAINT %s_pkey PRIMARY KEY (%s)) WITH (OIDS=FALSE); ALTER TABLE %s OWNER TO postgres;" % (table_name,table_name,sql_createtable_columns,table_name,pkey,table_name)
         ##  <- END
         ##  Use this when no primary key in the table
-            exesql = "DROP TABLE IF EXISTS %s; CREATE TABLE %s (%s) WITH (OIDS=FALSE); ALTER TABLE %s OWNER TO postgres;" % (table_name,table_name,sql_createtable_columns[:-1],table_name)
-            print "1111111"
-            print exesql
-            print "#" * 30            
+            exesql = "DROP TABLE IF EXISTS %s; CREATE TABLE %s (%s) WITH (OIDS=FALSE); ALTER TABLE %s OWNER TO postgres;" % (table_name,table_name,sql_createtable_columns[:-1],table_name)         
         ##  <- END
             # Execute query
             cur_dc.execute(exesql)
@@ -318,10 +315,7 @@ class MainWindow(QtGui.QMainWindow):
             # Copy records from CSV
             file_path = file_path.replace(LOCAL_DRIVER,ROOT_PATH)
             exesql = "COPY %s FROM '%s' USING DELIMITERS ',' CSV;" % (table_name,"%s%s.csv" % (file_path,table_name))
-            cur_dc.execute(exesql)
-            print "222222"
-            print exesql
-            print "#" * 30            
+            cur_dc.execute(exesql)         
             dbcon_dc.commit()
             error_msg = "<br/><hr><b>File uploaded successfully!</b><br/><br/>Please go to our admin site to <a href='http://pitondc1.piton.local/datacommons/admin/dcmetadata/sourcedatainventory/add/' target='_blank'>add metadata</a>."
             email_subject = "[DB_upload]New Table Added - %s" % table_name

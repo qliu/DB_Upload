@@ -284,7 +284,7 @@ class MainWindow(QtGui.QMainWindow):
         xls_sheet = xls_workbook.sheet_by_index(0)
         # Read headers
         for cell in xls_sheet.row(0):
-            headers.append(cell.value.strip().replace('+','_up_').replace(' ','_').replace('/','_').replace('&','_').replace('-','_').replace('%','per').lower())
+            headers.append('"%s"' % cell.value.strip().replace('+','_up_').replace(' ','_').replace('/','_').replace('&','_').replace('-','_').replace('%','per').lower())
         pkey = headers[0]
         # Read data types
         for cell in xls_sheet.row(1):
@@ -307,6 +307,9 @@ class MainWindow(QtGui.QMainWindow):
         ##  <- END
         ##  Use this when no primary key in the table
             exesql = "DROP TABLE IF EXISTS %s; CREATE TABLE %s (%s) WITH (OIDS=FALSE); ALTER TABLE %s OWNER TO postgres;" % (table_name,table_name,sql_createtable_columns[:-1],table_name)
+            print "1111111"
+            print exesql
+            print "#" * 30            
         ##  <- END
             # Execute query
             cur_dc.execute(exesql)
@@ -316,10 +319,13 @@ class MainWindow(QtGui.QMainWindow):
             file_path = file_path.replace(LOCAL_DRIVER,ROOT_PATH)
             exesql = "COPY %s FROM '%s' USING DELIMITERS ',' CSV;" % (table_name,"%s%s.csv" % (file_path,table_name))
             cur_dc.execute(exesql)
+            print "222222"
+            print exesql
+            print "#" * 30            
             dbcon_dc.commit()
             error_msg = "<br/><hr><b>File uploaded successfully!</b><br/><br/>Please go to our admin site to <a href='http://pitondc1.piton.local/datacommons/admin/dcmetadata/sourcedatainventory/add/' target='_blank'>add metadata</a>."
             email_subject = "[DB_upload]New Table Added - %s" % table_name
-            email_message = "This is a notification that new tabe %s has been added to the database." % table_name
+            email_message = 'This is a notification that new tabe "%s" has been added to the database.' % table_name
             self.send_email(email_subject,email_message)
         except Exception, e:
 #            self.error_label.setText("ERROR!<br/>")

@@ -12,25 +12,31 @@ import psycopg2
 import smtplib
 from email.mime.text import MIMEText
 
-LOCAL_DRIVER = 'O:/'
-UPLOAD_DATA_ROOT = 'O:/Data/Source Data/UPLOAD/'
 # Global constants
 IMAGE_ROOT = 'data/images'
 ## DB connection parameters
+
 ### Server "pitondc1" DB connection
+LOCAL_DRIVER = 'O:/'
+UPLOAD_DATA_ROOT = 'O:/Data/Source Data/UPLOAD/'
 ROOT_PATH = 'C:/Shared Files/Departments/'
 DB_DATABASE = 'data_initiative'
 DB_USER = 'Admin'
 DB_PASSWORD = 'Piton!'
 DB_HOST = 'pitondc1'
 DB_PORT = '5432'
+DB_SCHEMA = 'public'
+
 ### Local DB connection
+#LOCAL_DRIVER = 'C:/'
 #UPLOAD_DATA_ROOT = 'C:/UPLOAD/'
 #ROOT_PATH = 'C:/'
 #DB_DATABASE = 'data_initiative'
 #DB_USER = 'qliu'
+#DB_PASSWORD = 'postgres'
 #DB_HOST = 'localhost'
 #DB_PORT = '5432'
+#DB_SCHEMA = 'public'
 
 # EMAIL SETTINGS
 EMAIL_USE_TLS = True
@@ -151,7 +157,6 @@ class MainWindow(QtGui.QMainWindow):
         self.error_label.setTextFormat(QtCore.Qt.RichText)
         self.error_label.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
         self.error_label.move(20,200)
-
 
         # =========
         # Buttons
@@ -299,6 +304,16 @@ class MainWindow(QtGui.QMainWindow):
         # Create DB table
         try:
             cur_dc = dbcon_dc.cursor()
+            ## Check if talbe exists
+            exesql = "SELECT tablename FROM pg_tables WHERE schemaname = '%s'" % DB_SCHEMA
+            cur_dc.execute(exesql)
+            db_table_names = cur_dc.fetchall()
+            if db_table_names.count((table_name,)) > 0:
+                ### If table exists, pop up warning message box
+                reply = QtGui.QMessageBox.warning(self,"Table Already Exists","Do you want to overwrite it?\nClick 'Yes' to overwrite existed table.\nClick 'No' to cancel upload.",
+                        QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+                if reply == QtGui.QMessageBox.No:
+                    raise Exception("Upload Warning","Table '%s' already exists. Upload has been canceled. Please rename the table and try again." % table_name)
             for i in range(0,len(headers)):
                 sql_createtable_columns += "%s %s," % (headers[i],data_types[i])
                 sql_insert_columns += "%s," % headers[i]
@@ -322,9 +337,13 @@ class MainWindow(QtGui.QMainWindow):
             email_message = 'This is a notification that new tabe "%s" has been added to the database.' % table_name
             self.send_email(email_subject,email_message)
         except Exception, e:
-#            self.error_label.setText("ERROR!<br/>")
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            error_msg = "<br/><hr><span style='color:red'><b>ERROR!</b></span><br/><br/><b>%s</b>: %s<br/><hr><br/>Please try again! Click <a href='http://pitondc1.piton.local/datacommons/db_upload_help_doc/#errors'>HERE</a> for help.<br/><br/>Click <b>File -> Open...</b> to select a file to upload." % (exc_type.__name__,exc_obj)
+            if e.args[0] == "Upload Warning":
+                error_type, error_info = e.args
+            else:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                error_type = exc_type.__name__
+                error_info = exc_obj
+            error_msg = "<br/><hr><span style='color:red'><b>ERROR!</b></span><br/><br/><b>%s</b>: %s<br/><hr><br/>Please try again! Click <a href='http://pitondc1.piton.local/datacommons/db_upload_help_doc/#errors'>HERE</a> for help.<br/><br/>Click <b>File -> Open...</b> to select a file to upload." % (error_type,error_info)
         finally:
             # Close connection to Datacommons DB
             dbcon_dc.close()

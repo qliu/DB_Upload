@@ -36,5 +36,7 @@ setup(
                 'data/images/*'
             ]
         ),
-        options={"py2exe":{"includes":["sip","PyQt4.QtGui","PyQt4.QtCore"]}}
+        options={"py2exe":{"includes":["sip","PyQt4.QtGui","PyQt4.QtCore"],
+                 "dll_excludes":["MSVCP90.dll"]
+                }}
      )

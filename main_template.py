@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys,os
+import sys, os
 ## Import PyQt4
 from PyQt4 import QtGui, QtCore
 ## Import xlrd for reading XLS files with Python
@@ -17,36 +17,25 @@ IMAGE_ROOT = 'data/images'
 ## DB connection parameters
 
 ### Server "pitondc1" DB connection
-LOCAL_DRIVER = 'O:/'
-UPLOAD_DATA_ROOT = 'O:/Data/Source Data/UPLOAD/'
-ROOT_PATH = 'C:/Shared Files/Departments/'
-DB_DATABASE = 'data_initiative'
-DB_USER = 'Admin'
-DB_PASSWORD = 'Piton!'
-DB_HOST = 'pitondc1'
-DB_PORT = '5432'
-DB_SCHEMA = 'public'
-
-### Local DB connection
-#LOCAL_DRIVER = 'C:/'
-#UPLOAD_DATA_ROOT = 'C:/UPLOAD/'
-#ROOT_PATH = 'C:/'
-#DB_DATABASE = 'data_initiative'
-#DB_USER = 'qliu'
-#DB_PASSWORD = 'postgres'
-#DB_HOST = 'localhost'
-#DB_PORT = '5432'
-#DB_SCHEMA = 'public'
+LOCAL_DRIVER = "LOCAL_DRIVER"
+UPLOAD_DATA_ROOT = "UPLOAD_DATA_ROOT"
+ROOT_PATH = "ROOT_PATH"
+DB_DATABASE = "DB_DATABASE"
+DB_USER = "DB_USER"
+DB_PASSWORD = "DB_PASSWORD"
+DB_HOST = "DB_HOST"
+DB_PORT = "DB_PORT"
+DB_SCHEMA = "DB_SCHEMA"
 
 # EMAIL SETTINGS
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'dataenginemetadata@gmail.com'
-EMAIL_HOST_PASSWORD = 'demetadatapiton'
+EMAIL_USE_TLS = "EMAIL_USE_TLS"
+EMAIL_HOST = "EMAIL_HOST"
+EMAIL_PORT = "EMAIL_PORT"
+EMAIL_HOST_USER = "EMAIL_HOST_USER"
+EMAIL_HOST_PASSWORD = "EMAIL_HOST_PASSWORD"
 # Admin email
-ADMIN_EMAIL_ADDRESS = "dataenginemetadata@gmail.com"
-TO_EMAIL_ADDRESS = "dataenginemetadata+dbupload@gmail.com"
+ADMIN_EMAIL_ADDRESS = "ADMIN_EMAIL_ADDRESS"
+TO_EMAIL_ADDRESS = [TO_EMAIL_ADDRESS]
 
 class MainWindow(QtGui.QMainWindow):
     
@@ -234,7 +223,7 @@ class MainWindow(QtGui.QMainWindow):
         msg = MIMEText(email_message)
         msg['Subject'] = email_subject
         msg['From'] = ADMIN_EMAIL_ADDRESS
-        msg['To'] = TO_EMAIL_ADDRESS
+#        msg['To'] = TO_EMAIL_ADDRESS
         email_server.sendmail(ADMIN_EMAIL_ADDRESS,TO_EMAIL_ADDRESS,msg.as_string())
         email_server.quit()
         
@@ -343,6 +332,10 @@ class MainWindow(QtGui.QMainWindow):
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 error_type = exc_type.__name__
                 error_info = exc_obj
+                exesql = "DROP TABLE IF EXISTS %s;" % table_name
+                dbcon_dc.rollback()
+                cur_dc.execute(exesql)
+                dbcon_dc.commit()
             error_msg = "<br/><hr><span style='color:red'><b>ERROR!</b></span><br/><br/><b>%s</b>: %s<br/><hr><br/>Please try again! Click <a href='http://pitondc1.piton.local/datacommons/db_upload_help_doc/#errors'>HERE</a> for help.<br/><br/>Click <b>File -> Open...</b> to select a file to upload." % (error_type,error_info)
         finally:
             # Close connection to Datacommons DB
